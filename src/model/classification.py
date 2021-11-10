@@ -1,9 +1,13 @@
+from typing import Optional
+
 import torch.jit
 import torch.nn as nn
 import torchvision
+import pytorch_lightning as pl
+from pytorch_lightning.utilities.types import EVAL_DATALOADERS
 
 
-class ClassificationModel(nn.Module):
+class ClassificationModel(pl.LightningModule):
 
     def __init__(self, embed_dim=512, num_classes: int = 10):
         super().__init__()
@@ -20,3 +24,31 @@ class ClassificationModel(nn.Module):
         out = self.fc(embedding)
 
         return out
+
+    def training_step(self, *args, **kwargs):
+        pass
+
+    def validation_step(self, *args, **kwargs):
+        pass
+
+    def configure_optimizers(self):
+        pass
+
+    def prepare_data(self) -> None:
+        pass
+
+    def setup(self, stage: Optional[str] = None) -> None:
+        pass
+
+    def train_dataloader(self):
+        pass
+
+    def val_dataloader(self):
+        pass
+
+    def test_dataloader(self):
+        pass
+
+    def predict_dataloader(self):
+        pass
+

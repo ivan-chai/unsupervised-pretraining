@@ -10,17 +10,16 @@ class Evaluator:
     def __init__(self, batch_size: int = 32, device="cuda"):
 
         self.transforms = transforms.Compose([
-            transforms.ToTensor(),
+            transforms.ToTensor()
         ])
 
-        self._train_dataset = STL10("./data", split="test", folds=1, transform=self.transforms)
+        self._train_dataset = STL10("./data", split="train", folds=1, transform=self.transforms)
         self._test_dataset = STL10("./data", split="test", transform=self.transforms)
 
         self._train_loader = DataLoader(self._train_dataset, batch_size=batch_size, shuffle=True)
         self._test_loader = DataLoader(self._test_dataset, batch_size=batch_size, shuffle=False)
 
         self.device = device
-
 
     def train_fc(self, model, epochs=300):
 
