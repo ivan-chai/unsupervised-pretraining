@@ -1,0 +1,8 @@
+_target_: ulib.model.classification.ClassificationModel
+
+embed_dim: 256  # shape of jit model output
+num_classes: 10  # for STL10
+learning_rate: 3e-4  # classification model learning rate
+weights_path: ${work_dir}/models/sota_resnet/jit_resnet_18.pth  # path to jit model weights
+health_emb_path: ${work_dir}/models/sota_resnet/resnet_18_health_emb.pth  # path to control embedding form jit model
+health_data: ${work_dir}/dataset/health_dataset.pth  # do not edit this param!

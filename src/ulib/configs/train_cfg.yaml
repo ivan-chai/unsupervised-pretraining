@@ -1,0 +1,9 @@
+defaults:
+  - _self_
+  - trainer: trainer.yaml
+  - model: classification_resnet_18.yaml
+  - datamodule: stl10_module.yaml
+  - callbacks: default.yaml
+
+work_dir: ${hydra:runtime.cwd}
+data_dir: ${work_dir}/dataset

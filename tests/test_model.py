@@ -1,6 +1,6 @@
 import torch
 
-from src.model.classification import ClassificationModel
+from src.models.classification import ClassificationModel
 
 
 def test_model():

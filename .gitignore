@@ -132,4 +132,7 @@ dmypy.json
 .idea/
 
 # dataset
-dataset/
+dataset/stl10_binary
+
+# Pytorch-lightning logs
+lightning_logs/

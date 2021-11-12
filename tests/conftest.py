@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from src.model.classification import ClassificationModel
+from ulib.models.classification import ClassificationModel
 
 
 @pytest.fixture(scope="session")

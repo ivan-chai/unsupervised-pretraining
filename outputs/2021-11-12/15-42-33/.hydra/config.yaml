@@ -1,0 +1,14 @@
+early_stopping:
+  patience: 25
+  monitor: val_loss
+  mode: min
+  min_delta: 0.0001
+  verbose: true
+pbar:
+  refresh_rate: 20
+trainer:
+  max_epochs: 300
+  gpus: 1
+  callbacks:
+  - early_stopping
+  - pbar
