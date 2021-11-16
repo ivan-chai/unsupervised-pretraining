@@ -1,0 +1,12 @@
+hydra:
+  run:
+    dir: .
+
+defaults:
+  - _self_
+  - trainer: trainer.yaml
+  - datamodule: stl10_module.yaml
+  - callbacks: evaluator_callbacks.yaml
+
+work_dir: ${hydra:runtime.cwd}
+data_dir: ${work_dir}/dataset

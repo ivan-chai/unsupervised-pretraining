@@ -1,0 +1,5 @@
+_target_: unsupervised_pretraining.data.stl10.STL10DataModule
+
+data_dir: ${data_dir}
+batch_size: 32
+num_workers: 4

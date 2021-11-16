@@ -117,6 +117,10 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
+# Vim swap files
+*.swp
+*.swo
+
 # mkdocs documentation
 /site
 
@@ -127,3 +131,25 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Pycharm miscs
+.idea/
+
+# Hydra
+.hydra/
+
+# dataset
+dataset/
+
+# hydra outputs
+outputs/
+
+# Torch binaries
+*.pt
+*.pth
+
+# Pytorch-lightning logs
+lightning_logs/
+
+# temporary utility scripts
+make_resnet.py
