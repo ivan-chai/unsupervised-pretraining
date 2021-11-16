@@ -144,6 +144,10 @@ dataset/
 # hydra outputs
 outputs/
 
+# Torch binaries
+*.pt
+*.pth
+
 # Pytorch-lightning logs
 lightning_logs/
 
