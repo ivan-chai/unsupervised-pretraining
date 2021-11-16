@@ -5,6 +5,7 @@ Experiments with unsupervised pretraining in computer vision.
 
 ```
 git clone https://github.com/ivan-chai/unsupervised-pretraining
+cd unsupervised-pretraining/
 pip install -e .
 ```
 
