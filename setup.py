@@ -13,12 +13,15 @@ setup(
     package_dir={"": "src"},
     entry_points={
         "console_scripts": [
-            "ulib_train = ulib.scripts.train:main"
+            "ulib_evaluate = unsupervised_pretraining.scripts.evaluate:main"
         ]
     },
     install_requires=[
         "torch==1.10.0",
         "torchvision==0.11.1",
         "pytorch_lightning==1.5.1",
+        "torchmetrics==0.6.0",
+        "hydra-core==1.1.1",
+        "omegaconf==2.1.1"
     ]
 )
