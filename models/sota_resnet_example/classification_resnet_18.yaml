@@ -1,0 +1,11 @@
+model:
+  _target_: unsupervised_pretraining.model.classification.ClassificationModel
+
+  model_url: https://disk.yandex.ru/d/t8w2UqsipPsxvg  # URL на веса модели
+  emb_url: https://disk.yandex.ru/d/-BlHxm03FxRcfw  # URL на проверочный эмбеддинг
+  embed_dim: 256  # размерность эмбеддинга
+  num_classes: 10  # количество классов в датасете STL10
+  learning_rate: 3e-4  # шаг обучения классификатора
+  weights_path: ./models/sota_resnet_example/jit_resnet_18.pth  # путь до весов модели
+  health_emb_path: ./models/sota_resnet_example/resnet_18_health_emb.pth  # путь до проверочного эмбеддинга
+  health_dataset: ./dataset/health_dataset.pth  # путь до проверочного датасета
