@@ -1,0 +1,3 @@
+tensorboard:
+  _target_: pytorch_lightning.loggers.tensorboard.TensorBoardLogger
+  save_dir: ${work_dir}/tensorboard_logs

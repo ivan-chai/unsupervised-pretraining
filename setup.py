@@ -9,7 +9,7 @@ setup(
     author="",
     author_email="",
     packages=find_namespace_packages(where="src"),
-    python_requires='>=3.9',
+    python_requires='>=3.8',
     package_dir={"": "src"},
     entry_points={
         "console_scripts": [

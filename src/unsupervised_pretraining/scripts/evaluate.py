@@ -9,10 +9,13 @@ import pytorch_lightning as pl
 @hydra.main(config_path="../configs", config_name="evaluate_cfg.yaml")
 def main(cfg: DictConfig) -> None:
     pl.seed_everything(42)
-    data = instantiate(cfg.datamodule)
     with open(cfg.model, "r") as fin:
         model_cfg = OmegaConf.load(fin)
     model = instantiate(model_cfg.model)
+    augmentations = []
+    for _, augmentation in model_cfg.augmentations.items():
+        augmentations.append(instantiate(augmentation))
+    data = instantiate(cfg.datamodule, transform_list=augmentations)
     callbacks = []
     for _, callback in cfg.callbacks.items():
         callbacks.append(instantiate(callback))

@@ -1,11 +1,13 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
-from torchvision import transforms
 from torchvision.datasets import STL10
+
+from unsupervised_pretraining.data.stl10albumentations import STL10Albumentations
+import albumentations as A
 
 
 class STL10DataModule(LightningDataModule):
-    def __init__(self, data_dir, batch_size=32, num_workers=4):
+    def __init__(self, data_dir, batch_size, num_workers, transform_list):
         """Модуль данных для загрузки датасета STL10.
         Датасет STL-10 для экспериментов с обучением нейросетей без учителя (https://cs.stanford.edu/~acoates/stl10/).
         При первом вызове скачивает датасет в указанную в data_dir директорию.
@@ -18,9 +20,7 @@ class STL10DataModule(LightningDataModule):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.transform = transforms.Compose([
-            transforms.ToTensor(),
-        ])
+        self.transform = A.Compose(transform_list)
 
         self.num_classes = 10
 
@@ -29,10 +29,10 @@ class STL10DataModule(LightningDataModule):
 
     def setup(self, stage=None) -> None:
         if stage == "fit":
-            train_full = STL10(self.data_dir, split="train", transform=self.transform)
+            train_full = STL10Albumentations(self.data_dir, split="train", transform=self.transform)
             self.stl_train, self.stl_val = random_split(train_full, [4500, 500])
         if stage == "test":
-            self.stl_test = STL10(self.data_dir, split="test", transform=self.transform)
+            self.stl_test = STL10Albumentations(self.data_dir, split="test", transform=self.transform)
 
     def train_dataloader(self):
         return DataLoader(self.stl_train, batch_size=self.batch_size, num_workers=self.num_workers)
