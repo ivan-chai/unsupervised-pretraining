@@ -7,7 +7,6 @@ defaults:
   - trainer: trainer.yaml
   - datamodule: stl10_module.yaml
   - callbacks: evaluator_callbacks.yaml
-  - logger: evaluator_loggers.yaml
 
 work_dir: ${hydra:runtime.cwd}
 data_dir: ${work_dir}/dataset

@@ -1,0 +1,20 @@
+model:
+  _target_: unsupervised_pretraining.model.classification.ClassificationModel
+
+  model_url: https://disk.yandex.ru/d/Q5q825fc2SRlYg  # URL на веса модели
+  emb_url: https://disk.yandex.ru/d/icu-sHlzSbUlSg  # URL на проверочный эмбеддинг
+  embed_dim: 512  # размерность эмбеддинга
+  num_classes: 10  # количество классов в датасете STL10
+  learning_rate: 3e-4  # шаг обучения классификатора
+  weights_path: ./models/rotnet/rotnet_cpu.pt  # путь до весов модели
+  health_emb_path: ./models/rotnet/rotnet_check_emb.pt  # путь до проверочного эмбеддинга
+  health_dataset: ./dataset/health_dataset.pth  # путь до проверочного датасета
+
+augmentations:
+  normalize:
+    _target_: albumentations.augmentations.transforms.Normalize
+    _convert_: all
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+  to_tensor:
+    _target_: albumentations.pytorch.transforms.ToTensorV2

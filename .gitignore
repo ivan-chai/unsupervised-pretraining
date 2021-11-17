@@ -153,3 +153,6 @@ lightning_logs/
 
 # temporary utility scripts
 make_resnet.py
+
+# metrics
+results.txt

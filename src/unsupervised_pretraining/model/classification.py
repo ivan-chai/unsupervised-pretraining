@@ -32,7 +32,7 @@ class ClassificationModel(pl.LightningModule):
         )
 
         self.health_emb = torch.load(health_emb_path)
-        #  self._check_model_health(health_dataset)
+        self._check_model_health(health_dataset)
 
         self.lr = learning_rate
         self.loss = nn.CrossEntropyLoss()
