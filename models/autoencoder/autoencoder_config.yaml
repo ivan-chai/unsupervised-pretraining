@@ -1,0 +1,31 @@
+model:
+  _target_: unsupervised_pretraining.model.classification.ClassificationModel
+
+  model_url: https://disk.yandex.ru/d/1t117z-yqgyNDQ # URL на веса модели
+  emb_url: https://disk.yandex.ru/d/t3MVqpeRpBVkkw  # URL на проверочный эмбеддинг
+  embed_dim: 512  # размерность эмбеддинга
+  num_classes: 10  # количество классов в датасете STL10
+  learning_rate: 3e-4  # шаг обучения классификатора
+  weights_path: ./models/autoencoder/autoencoder_traced.pt  # путь до весов модели
+  health_emb_path: ./models/autoencoder/embeddings.pth  # путь до проверочного эмбеддинга
+  health_dataset: ./dataset/health_dataset.pth  # путь до проверочного датасета
+
+augmentations:
+  longest_max_size:
+    _target_: albumentations.augmentations.geometric.resize.LongestMaxSize
+    _convert_: all
+    max_size: [224, 224]
+  pad_if_need:
+    _target_: albumentations.augmentations.transforms.PadIfNeeded
+    position: 'top_left'
+    min_height: 224
+    min_width: 224
+    border_mode: cv2.BORDER_CONSTANT
+    value: 0
+  normalize:
+    _target_: albumentations.augmentations.transforms.Normalize
+    _convert_: all
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+  to_tensor:
+    _target_: albumentations.pytorch.transforms.ToTensorV2
