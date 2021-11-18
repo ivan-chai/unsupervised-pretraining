@@ -49,7 +49,6 @@ class ClassificationModel(pl.LightningModule):
 
     def _check_model_health(self, health_dataset):
         input = torch.load(health_dataset)
-
         model_emb = self.model[0](input)
         if not torch.allclose(model_emb, self.health_emb, atol=1e-5):
             raise Exception("Model is corrupted")

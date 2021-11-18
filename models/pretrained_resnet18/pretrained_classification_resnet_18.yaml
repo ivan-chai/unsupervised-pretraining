@@ -1,9 +1,9 @@
 model:
   _target_: unsupervised_pretraining.model.classification.ClassificationModel
 
-  model_url: https://disk.yandex.ru/d/fv2O7Xr2SZyuLA  # URL на веса модели
-  emb_url: https://disk.yandex.ru/d/R7rhVkZO5DQ5Bw  # URL на проверочный эмбеддинг
-  embed_dim: 256  # размерность эмбеддинга
+  model_url: https://disk.yandex.ru/d/_OB6EFZZCebGBQ  # URL на веса модели
+  emb_url: https://disk.yandex.ru/d/JxFpAitW_dZ3sQ  # URL на проверочный эмбеддинг
+  embed_dim: 512  # размерность эмбеддинга
   num_classes: 10  # количество классов в датасете STL10
   learning_rate: 3e-4  # шаг обучения классификатора
   weights_path: ./models/pretrained_resnet18/pretrained_resnet_18.pth  # путь до весов модели
@@ -11,10 +11,27 @@ model:
   health_dataset: ./dataset/health_dataset.pth  # путь до проверочного датасета
 
 augmentations:
-  normalize:
-    _target_: albumentations.augmentations.transforms.Normalize
-    _convert_: all
-    mean: [0.485, 0.456, 0.406]
-    std: [0.229, 0.224, 0.225]
-  to_tensor:
-    _target_: albumentations.pytorch.transforms.ToTensorV2
+  train_transforms:
+    normalize:
+      _target_: albumentations.augmentations.transforms.Normalize
+      _convert_: all
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+    resize:
+      _target_: albumentations.augmentations.geometric.resize.Resize
+      height: 224
+      width: 224
+    to_tensor:
+      _target_: albumentations.pytorch.transforms.ToTensorV2
+  test_transforms:
+    normalize:
+      _target_: albumentations.augmentations.transforms.Normalize
+      _convert_: all
+      mean: [ 0.485, 0.456, 0.406 ]
+      std: [ 0.229, 0.224, 0.225 ]
+    resize:
+      _target_: albumentations.augmentations.geometric.resize.Resize
+      height: 224
+      width: 224
+    to_tensor:
+      _target_: albumentations.pytorch.transforms.ToTensorV2

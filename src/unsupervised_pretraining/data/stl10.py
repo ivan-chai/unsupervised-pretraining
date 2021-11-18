@@ -7,7 +7,7 @@ import albumentations as A
 
 
 class STL10DataModule(LightningDataModule):
-    def __init__(self, data_dir, batch_size, num_workers, transform_list):
+    def __init__(self, data_dir, batch_size, num_workers, train_transforms_list, test_transforms_list):
         """Модуль данных для загрузки датасета STL10.
         Датасет STL-10 для экспериментов с обучением нейросетей без учителя (https://cs.stanford.edu/~acoates/stl10/).
         При первом вызове скачивает датасет в указанную в data_dir директорию.
@@ -20,7 +20,8 @@ class STL10DataModule(LightningDataModule):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.transform = A.Compose(transform_list)
+        self.train_transform = A.Compose(train_transforms_list)
+        self.test_transform = A.Compose(test_transforms_list)
 
         self.num_classes = 10
 
@@ -29,10 +30,10 @@ class STL10DataModule(LightningDataModule):
 
     def setup(self, stage=None) -> None:
         if stage == "fit":
-            train_full = STL10Albumentations(self.data_dir, split="train", transform=self.transform)
+            train_full = STL10Albumentations(self.data_dir, split="train", transform=self.train_transform)
             self.stl_train, self.stl_val = random_split(train_full, [4500, 500])
         if stage == "test":
-            self.stl_test = STL10Albumentations(self.data_dir, split="test", transform=self.transform)
+            self.stl_test = STL10Albumentations(self.data_dir, split="test", transform=self.test_transform)
 
     def train_dataloader(self):
         return DataLoader(self.stl_train, batch_size=self.batch_size, num_workers=self.num_workers)
