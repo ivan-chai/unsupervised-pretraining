@@ -22,6 +22,8 @@ setup(
         "pytorch_lightning==1.5.1",
         "torchmetrics==0.6.0",
         "hydra-core==1.1.1",
-        "omegaconf==2.1.1"
+        "omegaconf==2.1.1",
+        "albumentations==1.1.0",
+        "pytest==6.2.5"
     ]
 )
