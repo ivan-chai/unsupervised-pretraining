@@ -80,6 +80,7 @@ class InfoNCEModel(pl.LightningModule):
         denominator = torch.cat([negatives, positives.unsqueeze(1)], dim=1).sum(dim=1)  # [batch_size, self.T - self.k, self.k]
 
         loss = - torch.mean(torch.log(positives / denominator))  # InfoNCE Loss
+        self.log("val_loss", loss)
         return loss
 
     def on_train_epoch_end(self) -> None:
@@ -105,6 +106,7 @@ class InfoNCEModel(pl.LightningModule):
         denominator = torch.cat([negatives, positives.unsqueeze(1)], dim=1).sum(dim=1)  # [batch_size, self.T - self.k, self.k]
 
         loss = - torch.mean(torch.log(positives / denominator))  # InfoNCE Loss
+        self.log("val_loss", loss)
         return loss
 
     def testing_step(self, batch, batch_idx):
@@ -128,6 +130,7 @@ class InfoNCEModel(pl.LightningModule):
             dim=1)  # [batch_size, self.T - self.k, self.k]
 
         loss = - torch.mean(torch.log(positives / denominator))  # InfoNCE Loss
+        self.log("val_loss", loss)
         return loss
 
     def configure_optimizers(self):

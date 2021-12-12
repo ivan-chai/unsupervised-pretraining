@@ -16,7 +16,7 @@ class InfoNCEEncoder(nn.Module):
 
     def forward(self, X):
         """Forward pass of encoder.
-           Encoder splits image (256x256) into 7x7 patches with shape 64x64.
+           Encoder splits grayscale image (256x256) into 7x7 patches with shape 64x64.
            Then each patch passes through encoder.
         """
         # X.shape = [batch_size, channels, height, width]

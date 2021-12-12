@@ -5,7 +5,7 @@ model:
   T: 49
   k: 5
   learning_rate: 2e-4  # шаг обучения классификатора
-  weights_path: ./models/pretrained_resnet18/pretrained_resnet_18.pth  # путь до весов модели
+  weights_path: ./models/infoNCE/info_nce_resnet18.pth  # путь до весов модели
 
 augmentations:
   train_transforms:
