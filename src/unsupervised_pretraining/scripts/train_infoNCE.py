@@ -25,7 +25,6 @@ def main(cfg: DictConfig) -> None:
         callbacks.append(instantiate(callback))
     trainer = instantiate(cfg.trainer, callbacks=callbacks)
     trainer.fit(model, data)
-    trainer.test(model, data)
 
 
 if __name__ == "__main__":

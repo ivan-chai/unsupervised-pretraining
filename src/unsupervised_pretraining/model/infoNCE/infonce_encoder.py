@@ -10,7 +10,9 @@ class InfoNCEEncoder(nn.Module):
     """
     def __init__(self, encoder_path):
         super(InfoNCEEncoder, self).__init__()
-        self.encoder = nn.Sequential(*list(resnet18().children())[:-2])
+        layers = list(resnet18().children())[1:-2]
+        layers.insert(0, nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False))  # for gray-scale
+        self.encoder = nn.Sequential(*layers)
         self.encoder.add_module("mean_pool", nn.AvgPool2d(2))
         self.encoder_path = encoder_path
 
@@ -22,11 +24,10 @@ class InfoNCEEncoder(nn.Module):
         # X.shape = [batch_size, channels, height, width]
         batch_size = X.shape[0]
         embedding = torch.zeros((batch_size, 512, 49))
-        for b in range(batch_size):
-            for i in range(7):
-                for j in range(7):
-                    patch_emb = self.encoder(X[b, :, 32 * i: 64 + 32 * i, 32 * j: 64 + 32 * j].unsqueeze(0)).squeeze(-1).squeeze(-1)
-                    embedding[b, :, (i + j)] = patch_emb
+        X = X[:, 0, :, :]
+        X = X.unfold(1, 64, 32).unfold(2, 64, 32).reshape(batch_size, 1, 49, 64, 64)  # crops for current batch
+        for i in range(49):
+            embedding[:, :, i] = self.encoder(X[:, :, i, :, :]).squeeze(-1).squeeze(-1)
         return embedding
 
     def to_jit(self):
