@@ -7,6 +7,7 @@ defaults:
   - trainer: infonce_trainer.yaml
   - datamodule: stl10_unlabeled_module.yaml
   - callbacks: infonce_train_callbacks.yaml
+  - loggers: loggers.yaml
 
 work_dir: ${hydra:runtime.cwd}
 data_dir: ${work_dir}/dataset

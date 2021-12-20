@@ -149,7 +149,7 @@ outputs/
 *.pth
 
 # Pytorch-lightning logs
-lightning_logs/
+unsupervised_pretraining/
 
 # temporary utility scripts
 make_resnet.py

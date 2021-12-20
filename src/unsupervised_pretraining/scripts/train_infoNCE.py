@@ -23,7 +23,10 @@ def main(cfg: DictConfig) -> None:
     callbacks = []
     for _, callback in cfg.callbacks.items():
         callbacks.append(instantiate(callback))
-    trainer = instantiate(cfg.trainer, callbacks=callbacks)
+    loggers = []
+    for _, logger in cfg.loggers.items():
+        loggers.append(logger)
+    trainer = instantiate(cfg.trainer, callbacks=callbacks, logger=loggers)
     trainer.fit(model, data)
 
 

@@ -29,11 +29,10 @@ class InfoNCEModel(pl.LightningModule):
         self.autoregressive = nn.GRU(input_size=512, hidden_size=512, batch_first=True)
         self.Wk = nn.ModuleList([nn.Linear(512, embed_dim) for _ in range(k)])
         self.model = nn.ModuleList(list([self.encoder, self.autoregressive, self.Wk]))
-        self.function = nn.LogSoftmax()
 
         self.emb_dim = embed_dim
         self.weights_path = weights_path
-        self.num_negative_samples = 10
+        self.num_negative_samples = 5
         self.T = T
         self.k = k
         self.lr = learning_rate
@@ -57,7 +56,7 @@ class InfoNCEModel(pl.LightningModule):
         for idx in range(z.shape[1]):
             rolled_z = torch.roll(rolled_z, 1, 1)
             tiled_z[:, idx, :, :] = z[:, 0:5, :]
-        scores = torch.exp(torch.sum(torch.mul(r, tiled_z), dim=-1))
+        scores = torch.sum(torch.mul(r, tiled_z), dim=-1)
         return scores
 
     def training_step(self, batch, batch_idx):
@@ -77,9 +76,9 @@ class InfoNCEModel(pl.LightningModule):
         for idx in range(self.num_negative_samples):
             z_rolled = torch.roll(z_t, 1, dims=0)
             negatives[:, idx, :, :] = self.function(r, z_rolled)
-        denominator = torch.cat([negatives, positives.unsqueeze(1)], dim=1).sum(dim=1)  # [batch_size, self.T - self.k, self.k]
+        denominator = torch.cat([negatives, positives.unsqueeze(1)], dim=1)  # [batch_size, self.T - self.k, self.k]
 
-        loss = - torch.mean(torch.log(positives / denominator))  # InfoNCE Loss
+        loss = - torch.mean(positives - torch.logsumexp(denominator, dim=1, keepdim=True))  # InfoNCE Loss
         self.log("val_loss", loss)
         return loss
 
@@ -103,13 +102,13 @@ class InfoNCEModel(pl.LightningModule):
         for idx in range(self.num_negative_samples):
             z_rolled = torch.roll(z_t, 1, dims=0)
             negatives[:, idx, :, :] = self.function(r, z_rolled)
-        denominator = torch.cat([negatives, positives.unsqueeze(1)], dim=1).sum(dim=1)  # [batch_size, self.T - self.k, self.k]
+        denominator = torch.cat([negatives, positives.unsqueeze(1)], dim=1)  # [batch_size, self.T - self.k, self.k]
 
-        loss = - torch.mean(torch.log(positives / denominator))  # InfoNCE Loss
+        loss = - torch.mean(positives - torch.logsumexp(denominator, dim=1, keepdim=True))  # InfoNCE Loss
         self.log("val_loss", loss)
         return loss
 
-    def testing_step(self, batch, batch_idx):
+    def testing_step(self, batch):
         X, y = batch
         batch_size = X.shape[0]
         z = self.encoder(X)  # returns encoded patches with shape [batch_size, self.emb_dim, self.T]
@@ -121,15 +120,14 @@ class InfoNCEModel(pl.LightningModule):
         for idx, linear in enumerate(self.Wk):
             r[:, :, idx, :] = linear(context_t)
         positives = self.function(r, z_t)
-        # take 10 negative samples. 10 - is a magic constant
+        # take 5 negative samples. 5 - is a magic constant
         negatives = torch.zeros((batch_size, self.num_negative_samples, self.T - self.k, self.k))
         for idx in range(self.num_negative_samples):
             z_rolled = torch.roll(z_t, 1, dims=0)
             negatives[:, idx, :, :] = self.function(r, z_rolled)
-        denominator = torch.cat([negatives, positives.unsqueeze(1)], dim=1).sum(
-            dim=1)  # [batch_size, self.T - self.k, self.k]
+        denominator = torch.cat([negatives, positives.unsqueeze(1)], dim=1)  # [batch_size, self.T - self.k, self.k]
 
-        loss = - torch.mean(torch.log(positives / denominator))  # InfoNCE Loss
+        loss = - torch.mean(positives - torch.logsumexp(denominator, dim=1, keepdim=True))  # InfoNCE Loss
         self.log("val_loss", loss)
         return loss
 
