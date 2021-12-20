@@ -4,9 +4,9 @@ hydra:
 
 defaults:
   - _self_
-  - trainer: infonce_trainer.yaml
+  - trainer: cpc_trainer.yaml
   - datamodule: stl10_unlabeled_module.yaml
-  - callbacks: infonce_train_callbacks.yaml
+  - callbacks: cpc_train_callbacks.yaml
   - loggers: loggers.yaml
 
 work_dir: ${hydra:runtime.cwd}

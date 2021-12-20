@@ -3,4 +3,4 @@ tensorboard_logger:
 
   save_dir: ${work_dir}
   name: unsupervised_pretraining
-  sub_dir: infoNCE
+  sub_dir: CPC

@@ -11,7 +11,7 @@ from torchmetrics import Accuracy
 from unsupervised_pretraining.model.infoNCE import InfoNCEEncoder
 
 
-class InfoNCEModel(pl.LightningModule):
+class CPCTrainModel(pl.LightningModule):
 
     def __init__(self, learning_rate, embed_dim, weights_path, T=49, k=5):
         """
@@ -24,7 +24,7 @@ class InfoNCEModel(pl.LightningModule):
             T: overall number of patches from image.
             k: steps for prediction.
         """
-        super(InfoNCEModel, self).__init__()
+        super(CPCTrainModel, self).__init__()
         self.encoder = InfoNCEEncoder(weights_path)
         self.autoregressive = nn.GRU(input_size=512, hidden_size=512, batch_first=True)
         self.Wk = nn.ModuleList([nn.Linear(512, embed_dim) for _ in range(k)])
