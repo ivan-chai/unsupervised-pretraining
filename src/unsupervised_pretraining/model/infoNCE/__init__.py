@@ -1,1 +1,1 @@
-from .infonce_encoder import InfoNCEEncoder
+from .cpc_encoder import CPCEncoder
