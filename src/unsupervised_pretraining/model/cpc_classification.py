@@ -1,5 +1,6 @@
 # TODO: Universalize health embedding checking
-import torch.jit
+# TODO: bug fix: tensor device mismatch
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -7,35 +8,34 @@ import pytorch_lightning as pl
 from torchmetrics import Accuracy
 
 from unsupervised_pretraining.utils.disk import load_file
+from unsupervised_pretraining.model.CPC.cpc import CPCModel
 
 
-class ClassificationModel(pl.LightningModule):
+class CPCClassificationModel(pl.LightningModule):
 
-    def __init__(self, model_url, emb_url, embed_dim, num_classes, learning_rate,
-                 weights_path, health_emb_path, health_dataset):
+    def __init__(self, model_url, emb_url, num_classes, embed_dim, learning_rate,
+                 T, k, inference, weights_path, health_emb_path, health_dataset):
         """ Модель с выходным линейным слоем для задач многоклассовой классификации.
 
         :param model_url: ссылка на модель.
         :param emb_url: ссылка на проверочный эмбеддинг.
-        :param embed_dim: размерность эмбеддинга, который выдает модель.
         :param num_classes: количество классов (для STL-10 10 классов).
-        :param learning_rate: шаг обучения.
         :param weights_path: путь к весам претренированной модели.
         :param health_emb_path: путь к проверочному эмбеддингу.
         """
-        super(ClassificationModel, self).__init__()
+        super(CPCClassificationModel, self).__init__()
 
         self._load_model(model_url, emb_url, weights_path, health_emb_path)
-        jit_model = torch.jit.load(weights_path)
-        self.model = nn.Sequential(
-            jit_model,
-            nn.Linear(embed_dim, num_classes),
-        )
-
-        self.health_emb = torch.load(health_emb_path)
-        self._check_model_health(health_dataset)
-
-        self.lr = learning_rate
+        cpc_model = CPCModel(learning_rate, embed_dim, T, k, inference)
+        cpc_model.load_state_dict(torch.load(weights_path))
+        self.encoder = cpc_model.encoder
+        self.pooling = nn.AvgPool2d(49)
+        self.head = nn.Linear(cpc_model.emb_dim, num_classes)
+        self.model = nn.ModuleList([self.encoder, self.pooling, self.head])
+        #  ignore
+        #  self.health_emb = torch.load(health_emb_path)
+        #  self._check_model_health(health_dataset)
+        self.lr = cpc_model.learning_rate
         self.loss = nn.CrossEntropyLoss()
         self.metric = Accuracy()
 

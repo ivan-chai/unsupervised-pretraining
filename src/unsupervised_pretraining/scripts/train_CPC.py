@@ -6,7 +6,7 @@ from omegaconf import DictConfig, OmegaConf
 import pytorch_lightning as pl
 
 
-@hydra.main(config_path="../configs", config_name="train_infoNCE.yaml")
+@hydra.main(config_path="../configs", config_name="train_CPC.yaml")
 def main(cfg: DictConfig) -> None:
     pl.seed_everything(42)
     with open(cfg.model, "r") as fin:

@@ -26,14 +26,19 @@ class ClassificationModel(pl.LightningModule):
         super(ClassificationModel, self).__init__()
 
         self._load_model(model_url, emb_url, weights_path, health_emb_path)
-        jit_model = torch.jit.load(weights_path)
-        self.model = nn.Sequential(
+        self.jit_model = torch.jit.load(weights_path)
+        self.pooling = nn.AvgPool1d(49)
+        self.head = nn.Linear(embed_dim, num_classes)
+        self.model = nn.ModuleList(list([self.jit_model, self.pooling, self.head]))
+        """self.model = nn.Sequential(
             jit_model,
+            nn.AvgPool2d(49),
             nn.Linear(embed_dim, num_classes),
-        )
+        )"""
 
-        self.health_emb = torch.load(health_emb_path)
-        self._check_model_health(health_dataset)
+        # ignore
+        # self.health_emb = torch.load(health_emb_path)
+        # self._check_model_health(health_dataset)
 
         self.lr = learning_rate
         self.loss = nn.CrossEntropyLoss()
@@ -55,18 +60,26 @@ class ClassificationModel(pl.LightningModule):
             raise Exception("Model is corrupted")
 
     def forward(self, X):
-        X = self.model(X)
+        X = self.jit_model(X)
+        X = X.to(torch.device("cuda:0"))
+        X = self.head(self.pooling(X).squeeze(-1))
         return F.softmax(X, dim=1)
 
     def training_step(self, batch, batch_idx):
         X, y = batch
-        logits = self.model(X)
+        X = X[:, 0, :, :].unsqueeze(1)
+        X = self.jit_model(X)
+        X = X.to(torch.device("cuda:0"))
+        logits = self.head(self.pooling(X).squeeze(-1))
         loss = self.loss(logits, y)
         return loss
 
     def validation(self, batch):
         X, y = batch
-        logits = self.model(X)
+        X = X[:, 0, :, :].unsqueeze(1)
+        X = self.jit_model(X)
+        X = X.to(torch.device("cuda:0"))  # dirty hack. Otherwise, tensor will be on CPU.
+        logits = self.head(self.pooling(X).squeeze(-1))
         loss = self.loss(logits, y)
         preds = torch.argmax(logits, dim=1)
         acc = self.metric(preds, y)

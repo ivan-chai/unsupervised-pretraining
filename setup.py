@@ -14,7 +14,7 @@ setup(
     entry_points={
         "console_scripts": [
             "ulib_evaluate = unsupervised_pretraining.scripts.evaluate:main",
-            "ulib_infoNCE_train = unsupervised_pretraining.scripts.train_infoNCE:main"
+            "ulib_infoNCE_train = unsupervised_pretraining.scripts.train_CPC:main"
         ]
     },
     install_requires=[
