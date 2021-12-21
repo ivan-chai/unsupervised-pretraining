@@ -152,6 +152,9 @@ outputs/
 unsupervised_pretraining/
 lightning_logs/
 
+# Jupyter notebooks
+notebooks/
+
 # temporary utility scripts
 make_resnet.py
 
