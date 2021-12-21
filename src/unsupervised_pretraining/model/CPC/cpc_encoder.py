@@ -14,6 +14,7 @@ class CPCEncoder(nn.Module):
         layers.insert(0, nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False))  # for gray-scale
         self.encoder = nn.Sequential(*layers)
         self.encoder.add_module("mean_pool", nn.AvgPool2d(2))
+        self.device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
 
     def forward(self, X):
         """Forward pass of encoder.

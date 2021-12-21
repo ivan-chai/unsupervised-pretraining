@@ -9,6 +9,7 @@ import pytorch_lightning as pl
 from torchmetrics import Accuracy
 
 from unsupervised_pretraining.model.CPC import CPCEncoder
+from unsupervised_pretraining.model.CPC.loss import InfoNCELoss
 
 
 class CPCModel(pl.LightningModule):
@@ -34,6 +35,7 @@ class CPCModel(pl.LightningModule):
         self.T = T
         self.k = k
         self.learning_rate = learning_rate
+        self.loss = InfoNCELoss(self.emb_dim, self.emb_dim)
         self.metric = Accuracy()
 
     def forward(self, X):
@@ -49,24 +51,6 @@ class CPCModel(pl.LightningModule):
         embeddings = self.pooling(patches_embeddings).squeeze(-1)
         return embeddings
 
-    @staticmethod
-    def function(r, z):
-        """Function to calculate scores (density ratio).
-        Args:
-            r: predicted by log-bilinear model with shape [batch_size, self.T - self.k, self.k, emb_dim]
-            z: embeddings from encoder with shape [batch_size, self.T - self.k, emb_dim]
-        Returns:
-            scores: shape [batch_size, self.T - self.k, self.k]
-        """
-        # do tile
-        tiled_z = torch.empty(*r.shape)
-        rolled_z = z.clone()
-        for idx in range(z.shape[1]):
-            rolled_z = torch.roll(rolled_z, 1, 1)
-            tiled_z[:, idx, :, :] = z[:, 0:5, :]
-        scores = torch.sum(torch.mul(r, tiled_z), dim=-1)
-        return scores
-
     def step(self, X):
         """General step for train/val/test CPC model step.
            Args:
@@ -74,23 +58,14 @@ class CPCModel(pl.LightningModule):
            Returns:
                loss - infoNCE loss for current batch.
         """
-        batch_size = X.shape[0]
-        z = self.encoder(X)  # returns encoded patches with shape [batch_size, self.emb_dim, self.T]
+        z = self.encoder(X).to(self.device)  # returns encoded patches with shape [batch_size, self.emb_dim, self.T]
 
-        z_t, z_t_k = z[:, :, :-self.k], z[:, :, -self.k:]
-        z_t = z_t.permute(0, 2, 1).to(self.device)
+        # z_t, z_t_k = z[:, :, :-self.k], z[:, :, -self.k:]
+        z_t = z.permute(0, 2, 1)
         context_t, _ = self.autoregressive(z_t)
-        r = torch.zeros((batch_size, self.T - self.k, self.k, self.emb_dim))
-        for idx, linear in enumerate(self.Wk):
-            r[:, :, idx, :] = linear(context_t)
-        positives = self.function(r, z_t)
-        negatives = torch.zeros((batch_size, self.num_negative_samples, self.T - self.k, self.k))
-        for idx in range(self.num_negative_samples):
-            z_rolled = torch.roll(z_t, 1, dims=0)
-            negatives[:, idx, :, :] = self.function(r, z_rolled)
-        denominator = torch.cat([negatives, positives.unsqueeze(1)], dim=1)  # [batch_size, self.T - self.k, self.k]
-        loss = - torch.mean(positives - torch.logsumexp(denominator, dim=1, keepdim=True))  # InfoNCE Loss
-        return loss
+        z = z.permute(0, 2, 1)
+        loss = self.loss(z, context_t)
+        return loss.mean()
 
     def training_step(self, batch, batch_idx):
         X, y = batch

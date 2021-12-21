@@ -1,11 +1,10 @@
 model:
-  _target_: unsupervised_pretraining.model.CPC.cpc.CPCModel
+  _target_: unsupervised_pretraining.model.CPC.cpc_model.CPCModel
 
   embed_dim: 512  # размерность эмбеддинга
   T: 49
   k: 5
-  learning_rate: 2e-4  # шаг обучения классификатора
-  weights_path: ./models/CPC/info_nce_resnet18.pth  # путь до весов модели
+  learning_rate: 2e-4  # шаг обучения
 
 augmentations:
   train_transforms:
