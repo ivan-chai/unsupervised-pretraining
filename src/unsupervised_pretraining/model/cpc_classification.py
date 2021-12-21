@@ -25,11 +25,11 @@ class CPCClassificationModel(pl.LightningModule):
         """
         super(CPCClassificationModel, self).__init__()
 
-        self._load_model(model_url, emb_url, weights_path, health_emb_path)
+        #  self._load_model(model_url, emb_url, weights_path, health_emb_path)
         cpc_model = CPCModel(learning_rate, embed_dim, T, k, inference)
         cpc_model.load_state_dict(torch.load(weights_path))
         self.encoder = cpc_model.encoder
-        self.pooling = nn.AvgPool2d(49)
+        self.pooling = nn.AvgPool1d(49)
         self.head = nn.Linear(cpc_model.emb_dim, num_classes)
         self.model = nn.ModuleList([self.encoder, self.pooling, self.head])
         #  ignore
@@ -60,13 +60,19 @@ class CPCClassificationModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         X, y = batch
-        logits = self.model(X)
+        X = X[:, 0, :, :].unsqueeze(1)
+        X = self.encoder(X)
+        X = X.to(torch.device("cuda:0"))  # dirty hack. Otherwise, tensor will be on CPU.
+        logits = self.head(self.pooling(X).squeeze(-1))
         loss = self.loss(logits, y)
         return loss
 
     def validation(self, batch):
         X, y = batch
-        logits = self.model(X)
+        X = X[:, 0, :, :].unsqueeze(1)
+        X = self.encoder(X)
+        X = X.to(torch.device("cuda:0"))  # dirty hack. Otherwise, tensor will be on CPU.
+        logits = self.head(self.pooling(X).squeeze(-1))
         loss = self.loss(logits, y)
         preds = torch.argmax(logits, dim=1)
         acc = self.metric(preds, y)

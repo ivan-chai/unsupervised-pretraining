@@ -150,6 +150,7 @@ outputs/
 
 # Pytorch-lightning logs
 unsupervised_pretraining/
+lightning_logs/
 
 # temporary utility scripts
 make_resnet.py
