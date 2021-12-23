@@ -23,20 +23,19 @@ class CPCModel(pl.LightningModule):
             k: steps for prediction.
         """
         super(CPCModel, self).__init__()
-        self.encoder = CPCEncoder()
-        self.autoregressive = nn.GRU(input_size=512, hidden_size=512, batch_first=True)
-        self.Wk = nn.ModuleList([nn.Linear(512, embed_dim) for _ in range(k)])
-        self.model = nn.ModuleList(list([self.encoder, self.autoregressive, self.Wk]))
-        if inference:
-            self.pooling = nn.AvgPool2d(49)
-
-        self.emb_dim = embed_dim
+        self.embed_dim = embed_dim
         self.num_negative_samples = 5  # magic constant
         self.T = T
         self.k = k
         self.learning_rate = learning_rate
-        self.loss = InfoNCELoss(self.emb_dim, self.emb_dim)
         self.metric = Accuracy()
+
+        self.encoder = CPCEncoder()
+        self.autoregressive = nn.GRU(input_size=512, hidden_size=512, batch_first=True)
+        self.loss = InfoNCELoss(self.embed_dim, self.embed_dim)
+        self.model = nn.ModuleList(list([self.encoder, self.autoregressive, self.loss]))
+        if inference:
+            self.pooling = nn.AvgPool2d(49)
 
     def forward(self, X):
         """
@@ -60,11 +59,11 @@ class CPCModel(pl.LightningModule):
         """
         z = self.encoder(X).to(self.device)  # returns encoded patches with shape [batch_size, self.emb_dim, self.T]
 
-        # z_t, z_t_k = z[:, :, :-self.k], z[:, :, -self.k:]
-        z_t = z.permute(0, 2, 1)
+        z_t, z_t_k = z[:, :, :-self.k], z[:, :, -self.k:]
+        z_t = z_t.permute(0, 2, 1)
         context_t, _ = self.autoregressive(z_t)
-        z = z.permute(0, 2, 1)
-        loss = self.loss(z, context_t)
+        #  z = z.permute(0, 2, 1)
+        loss = self.loss(z_t, context_t)
         return loss.mean()
 
     def training_step(self, batch, batch_idx):

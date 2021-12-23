@@ -8,7 +8,7 @@ import pytorch_lightning as pl
 from torchmetrics import Accuracy
 
 from unsupervised_pretraining.utils.disk import load_file
-from unsupervised_pretraining.model.CPC.cpc import CPCModel
+from unsupervised_pretraining.model.CPC.cpc_model import CPCModel
 
 
 class CPCClassificationModel(pl.LightningModule):
@@ -31,7 +31,7 @@ class CPCClassificationModel(pl.LightningModule):
         self.encoder = cpc_model.encoder
         self.pooling = nn.AvgPool1d(49)
         self.head = nn.Linear(cpc_model.emb_dim, num_classes)
-        self.model = nn.ModuleList([self.encoder, self.pooling, self.head])
+        self.model = nn.Sequential(self.encoder, self.pooling, self.head)
         #  ignore
         #  self.health_emb = torch.load(health_emb_path)
         #  self._check_model_health(health_dataset)
@@ -55,15 +55,15 @@ class CPCClassificationModel(pl.LightningModule):
             raise Exception("Model is corrupted")
 
     def forward(self, X):
-        X = self.model(X)
-        return F.softmax(X, dim=1)
+        X = X[:, 0, :, :].unsqueeze(1)
+        X = self.encoder(X)
+        logits = self.head(self.pooling(X).squeeze(-1))
+        return logits
+        #return F.softmax(X, dim=1)
 
     def training_step(self, batch, batch_idx):
         X, y = batch
-        X = X[:, 0, :, :].unsqueeze(1)
-        X = self.encoder(X)
-        X = X.to(torch.device("cuda:0"))  # dirty hack. Otherwise, tensor will be on CPU.
-        logits = self.head(self.pooling(X).squeeze(-1))
+        logits = self(X)
         loss = self.loss(logits, y)
         return loss
 

@@ -2,9 +2,10 @@
 import torch
 import torch.nn as nn
 from torchvision.models import resnet18
+import pytorch_lightning as pl
 
 
-class CPCEncoder(nn.Module):
+class CPCEncoder(pl.LightningModule):
     """ResNet-18 encoder for CPC model.
        Dimension of output embedding is (512, 7, 7).
     """
@@ -14,7 +15,6 @@ class CPCEncoder(nn.Module):
         layers.insert(0, nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False))  # for gray-scale
         self.encoder = nn.Sequential(*layers)
         self.encoder.add_module("mean_pool", nn.AvgPool2d(2))
-        self.device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
 
     def forward(self, X):
         """Forward pass of encoder.
@@ -28,9 +28,19 @@ class CPCEncoder(nn.Module):
         """
         # X.shape = [batch_size, channels, height, width]
         batch_size = X.shape[0]
-        embedding = torch.zeros((batch_size, 512, 49))
+        embedding = torch.zeros((batch_size, 512, 49)).to(self.device)
         X = X[:, 0, :, :]  # take one channel of grayscale image.
         X = X.unfold(1, 64, 32).unfold(2, 64, 32).reshape(batch_size, 1, 49, 64, 64)  # crops for current batch
         for i in range(49):
             embedding[:, :, i] = self.encoder(X[:, :, i, :, :]).squeeze(-1).squeeze(-1)
         return embedding
+
+    def training_step(self, batch, batch_idx):
+        X, y = batch
+        embeddings = self(X)
+        return embeddings
+
+    def validation_step(self, batch, batch_idx):
+        X, y = batch
+        embeddings = self(X)
+        return embeddings

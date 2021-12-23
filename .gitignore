@@ -148,6 +148,9 @@ outputs/
 *.pt
 *.pth
 
+# Lightning checkpoints
+*.ckpt
+
 # Pytorch-lightning logs
 unsupervised_pretraining/
 lightning_logs/
@@ -160,3 +163,6 @@ make_resnet.py
 
 # metrics
 results.txt
+
+# pictures
+pics/
