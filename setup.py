@@ -6,10 +6,10 @@ setup(
     long_description="Unsupervised pretraining library.",
     license="MIT",
     url="https://github.com/ivan-chai/unsupervised-pretraining",
-    author="",
-    author_email="",
+    author="Ivan Karpukhin, Anton Ber, Ilya Basharov, Vyacheslav Voiteshonok",
+    author_email="karpuhini@yandex.ru, berantonmsu@gmail.com, ilya.basharov.98@mail.ru, vsvoiteshonok1@gmail.com",
     packages=find_namespace_packages(where="src"),
-    python_requires='>=3.9',
+    python_requires='>=3.8',
     package_dir={"": "src"},
     entry_points={
         "console_scripts": [
