@@ -1,0 +1,5 @@
+MulticoreTSNE
+albumentations
+tqdm
+prettytable
+IPython
